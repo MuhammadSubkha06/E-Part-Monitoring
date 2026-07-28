@@ -6,6 +6,7 @@ import {
     TextInput,
     StyleSheet,
     Image,
+    Alert,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/RootNavigator";
@@ -24,6 +25,25 @@ export default function LoginScreen({
 }: Props) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    const localUsername = "Saya Buruk";
+    const localPassword = "Pundung";
+
+    const handleLogin = () => {
+        if (username.trim() === localUsername && password === localPassword) {
+            navigation.replace("Dashboard");
+        } else if(username === "" && password === ""){
+            Alert.alert(
+                "Login Gagal",
+                "Username atau password tidak boleh kosong"
+            )
+        }else {
+            Alert.alert(
+                "Login Gagal",
+                "Username atau password salah."
+            );
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -63,9 +83,7 @@ export default function LoginScreen({
                 <View style={{ marginTop: 25 }}>
                     <PrimaryButton
                         title="LOGIN"
-                        onPress={() =>
-                            navigation.replace("Dashboard")
-                        }
+                        onPress={() => handleLogin()}
                     />
                 </View>
 
@@ -90,10 +108,9 @@ const styles = StyleSheet.create({
     },
 
     logo: {
-        width: 110,
-        height: 110,
+        width: 200,
+        height: 200,
         alignSelf: "center",
-        marginBottom: 20,
     },
 
     label: {
@@ -101,7 +118,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: Colors.text,
         marginBottom: 8,
-        marginTop: 12,
+        marginTop: 1,
     },
 
     input: {

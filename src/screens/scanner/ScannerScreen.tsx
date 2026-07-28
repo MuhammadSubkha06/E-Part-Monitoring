@@ -76,24 +76,16 @@ export default function ScannerScreen({
 
                 <View style={styles.row}>
 
-
                     <TouchableOpacity
                         style={styles.toolButton}
                         activeOpacity={0.7}
                     >
-
                         <Text>
                             ⚡ Flash
                         </Text>
-
                     </TouchableOpacity>
 
-
-
                 </View>
-
-
-
 
 
                 <ResultCard
@@ -127,7 +119,6 @@ export default function ScannerScreen({
                         onPress={() => {
 
                             if (route.params.type === "Stock In") {
-
                                 navigation.navigate(
                                     "StockInManual",
                                     {
@@ -136,45 +127,30 @@ export default function ScannerScreen({
                                         uniqueNumber: scanResult.uniqueNumber,
                                     }
                                 );
-
                             }
 
 
                             if (route.params.type === "Stock Out") {
-
                                 navigation.navigate(
                                     "StockOut"
                                 );
-
                             }
 
-
                             if (route.params.type === "Return") {
-
                                 navigation.navigate(
                                     "Return"
                                 );
-
                             }
-
                         }}
-
                     />
-
 
                 </View>
 
-
             </ScrollView>
 
-
         </SafeAreaView>
-
     );
-
 }
-
-
 
 const styles = StyleSheet.create({
 

@@ -30,7 +30,7 @@ export default function DashboardScreen({
       >
         <AppHeader
           title="E Part Monitoring"
-          subtitle="Selamat datang, Bombom 👋"
+          subtitle="Selamat datang, Bombom"
         />
 
         <Text style={styles.sectionTitle}>
@@ -88,7 +88,7 @@ export default function DashboardScreen({
             }
           />
 
-          
+
         </View>
 
         <Text style={styles.sectionTitle}>

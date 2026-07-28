@@ -31,7 +31,7 @@ export default function ProfileScreen() {
         </Text>
 
         <Text style={styles.role}>
-          Operator Warehouse
+          General manager
         </Text>
 
         <View style={{ marginTop: 30 }}>
