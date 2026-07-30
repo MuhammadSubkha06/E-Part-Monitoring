@@ -42,9 +42,7 @@ export default function DashboardScreen({
             icon="📥"
             title="Stock In"
             onPress={() =>
-              navigation.navigate("Scanner", {
-                type: "Stock In",
-              })
+              navigation.navigate("ModuleStockIn")
             }
           />
 
@@ -52,9 +50,7 @@ export default function DashboardScreen({
             icon="📤"
             title="Stock Out"
             onPress={() =>
-              navigation.navigate("Scanner", {
-                type: "Stock Out",
-              })
+              navigation.navigate("ModuleStockOut")
             }
           />
         </View>
@@ -62,11 +58,9 @@ export default function DashboardScreen({
         <View style={styles.row}>
           <MenuCard
             icon="🔄"
-            title="Return"
+            title="Return MC Dry"
             onPress={() =>
-              navigation.navigate("Scanner", {
-                type: "Return",
-              })
+              navigation.navigate("ModuleReturnMcDry")
             }
           />
 
@@ -74,12 +68,20 @@ export default function DashboardScreen({
             icon="📜"
             title="History"
             onPress={() =>
-              navigation.navigate("History")
+              navigation.navigate("ModuleHistory")
             }
           />
         </View>
 
         <View style={styles.row}>
+          <MenuCard
+            icon="ℹ️"
+            title="Information"
+            onPress={() =>
+              navigation.navigate("ModuleInformation")
+            }
+          />
+
           <MenuCard
             icon="👤"
             title="Profile"
@@ -87,8 +89,6 @@ export default function DashboardScreen({
               navigation.navigate("Profile")
             }
           />
-
-
         </View>
 
         <Text style={styles.sectionTitle}>

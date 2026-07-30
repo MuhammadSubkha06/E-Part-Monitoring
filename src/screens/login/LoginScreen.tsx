@@ -26,8 +26,8 @@ export default function LoginScreen({
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const localUsername = "Saya Buruk";
-    const localPassword = "Pundung";
+    const localUsername = "Bombom";
+    const localPassword = "123456";
 
     const handleLogin = () => {
         if (username.trim() === localUsername && password === localPassword) {
