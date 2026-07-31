@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useScannerFlow } from '../hooks/useScannerFlow';
 import { materialService } from '../services/MaterialService';
-import ScannerCamera from '../components/ScannerCamera';
+import HidScanInput from '../components/HidScanInput';
 import LoadingOverlay from '../components/LoadingOverlay';
 import ErrorState from '../components/ErrorState';
 import MaterialSummary from '../components/MaterialSummary';
@@ -15,22 +15,16 @@ import { Colors, Spacing, Typography } from '../constants/theme';
 import { DEMO_QR_CODES } from '../constants/demoQrCodes';
 
 export default function ReturnMcDryScreen() {
-  const { state, setCameraPermission, handleScan, confirm, reset } = useScannerFlow(
+  const { state, handleScan, confirm, reset } = useScannerFlow(
     useCallback((id: string) => materialService.confirmReturnToMcDry(id), []),
   );
 
   if (state.step === 'IDLE_SCANNING') {
     return (
-      <View style={styles.screen}>
-        <Header title="Return MC Dry" subtitle="Scan a material QR code to return to storage" />
-        <ScannerCamera
-          permission={state.cameraPermission}
-          onRequestPermission={() => setCameraPermission(true)}
-          onScan={handleScan}
-          hint="Align the QR code within the frame"
-          demoQrCodes={DEMO_QR_CODES}
-        />
-      </View>
+      <ScrollView contentContainerStyle={styles.idleScroll} keyboardShouldPersistTaps="handled">
+        <Header title="Return MC Dry" subtitle="Scan a material barcode to return to storage" />
+        <HidScanInput onScan={handleScan} hint="Material pauses its Exposure Time in MC Dry" demoBarcodes={DEMO_QR_CODES} />
+      </ScrollView>
     );
   }
 
@@ -38,7 +32,7 @@ export default function ReturnMcDryScreen() {
     return (
       <View style={styles.screen}>
         <Header title="Return MC Dry" />
-        <LoadingOverlay label="Validating QR and reading material state…" />
+        <LoadingOverlay label="Validating barcode and reading material state…" />
       </View>
     );
   }
@@ -68,7 +62,7 @@ export default function ReturnMcDryScreen() {
               <InfoCard label="Lot Number" value={m.lotNumber} />
               <InfoCard label="Quantity" value={`${m.quantity} ${m.unit}`} />
               <InfoCard label="Current Location" value={m.currentLocation} />
-              <InfoCard label="Baking Count" value={`${m.bakingCount} / ${m.bakingLimit}`} />
+              <InfoCard label="Baking Count" value={m.bakingAllowed ? `${m.bakingCount} / ${m.bakingLimit}` : 'N/A'} />
             </View>
           </SectionCard>
 
@@ -79,7 +73,7 @@ export default function ReturnMcDryScreen() {
       <TransactionFooter
         confirmLabel="Confirm Return"
         onCancel={reset}
-        onConfirm={confirm}
+        onConfirm={() => confirm()}
         loading={state.step === 'SUBMITTING'}
       />
 
@@ -104,6 +98,7 @@ function Header({ title, subtitle }: { title: string; subtitle?: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.background },
+  idleScroll: { flexGrow: 1, backgroundColor: Colors.background },
   header: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,

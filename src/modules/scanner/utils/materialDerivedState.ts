@@ -11,17 +11,23 @@ export function deriveMaterialState(
   const exposure = calculateExposure(material, now);
   const shelfLife = calculateShelfLife(material, fluxType3, now);
 
-  const needsBaking =
-    (exposure.exposureStatus === 'EXPIRED' || exposure.exposureStatus === 'WARNING') &&
-    material.bakingCount < (material.bakingLimit || DEFAULT_BAKING_LIMIT);
+  const bakingLimit = material.bakingLimit || DEFAULT_BAKING_LIMIT;
+  const isExpired = exposure.exposureStatus === 'EXPIRED';
+  const isScrapped = material.currentStatus === 'SCRAP';
+
+  // Baking is only offered when the Master Part allows it AND the baking
+  // count hasn't already hit the Master Part's Maximum Baking Count. If
+  // baking isn't allowed at all, an expired material goes straight to SCRAP
+  // instead of NEED_BAKING (handled by the repository on transaction).
+  const needsBaking = !isScrapped && isExpired && material.bakingAllowed && material.bakingCount < bakingLimit;
 
   const badges: MaterialStatus[] = [];
-  
+
   badges.push(material.currentStatus);
 
   if (material.category === 'PCB') {
     if (shelfLife.shelfLifeStatus === 'EXPIRED') badges.push('PCB_EXPIRED');
-  } else {
+  } else if (!isScrapped) {
     if (exposure.exposureStatus === 'RUNNING') badges.push('EXPOSURE_RUNNING');
     if (exposure.exposureStatus === 'PAUSED') badges.push('EXPOSURE_PAUSED');
     if (exposure.exposureStatus === 'WARNING') badges.push('EXPOSURE_WARNING');
@@ -29,7 +35,7 @@ export function deriveMaterialState(
   }
 
   if (needsBaking) badges.push('NEED_BAKING');
-  if (material.bakingCount >= (material.bakingLimit || DEFAULT_BAKING_LIMIT)) {
+  if (!isScrapped && material.bakingCount >= bakingLimit && material.bakingAllowed) {
     badges.push('BAKING_LIMIT_REACHED');
   }
 

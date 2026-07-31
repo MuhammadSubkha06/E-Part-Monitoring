@@ -1,5 +1,6 @@
 import { Material, ExposureStatus } from '../types/material.types';
 import { EXPOSURE_WARNING_THRESHOLD_PERCENT } from '../constants/businessRules';
+import { hoursBetween } from './dateUtils';
 
 export interface ExposureResult {
   exposureStatus: ExposureStatus;
@@ -8,13 +9,36 @@ export interface ExposureResult {
   exposurePercentUsed: number;
 }
 
-export function calculateExposure(material: Material, _now: Date = new Date()): ExposureResult {
+/**
+ * Live exposure hours = the frozen "accumulated" value (recorded the last
+ * time exposure was paused, e.g. entering MC Dry) plus however long it has
+ * been running since it was last resumed (Stock Out / resumed from MC Dry).
+ * When `exposureResumedAt` is null, exposure is paused and this simply
+ * returns the accumulated value.
+ */
+export function computeLiveExposureHours(material: Material, now: Date = new Date()): number {
+  if (!material.exposureResumedAt) {
+    return material.accumulatedExposureHours;
+  }
+  return material.accumulatedExposureHours + hoursBetween(new Date(material.exposureResumedAt), now);
+}
+
+export function calculateExposure(material: Material, now: Date = new Date()): ExposureResult {
   if (material.category === 'PCB') {
     return {
       exposureStatus: 'NOT_APPLICABLE',
       currentExposureHours: 0,
       remainingExposureHours: 0,
       exposurePercentUsed: 0,
+    };
+  }
+
+  if (material.currentStatus === 'SCRAP') {
+    return {
+      exposureStatus: 'EXPIRED',
+      currentExposureHours: material.accumulatedExposureHours,
+      remainingExposureHours: 0,
+      exposurePercentUsed: 100,
     };
   }
 
@@ -27,14 +51,8 @@ export function calculateExposure(material: Material, _now: Date = new Date()): 
     };
   }
 
-  // currentExposureHours is authoritative — it is frozen by the repository
-  // the instant the material enters MC Dry / Stock Out, and resumes ticking
-  // from that frozen value when it re-enters circulation.
-  const currentExposureHours = material.currentExposureHours;
-  const remainingExposureHours = Math.max(
-    0,
-    material.exposureLimitHours - currentExposureHours,
-  );
+  const currentExposureHours = computeLiveExposureHours(material, now);
+  const remainingExposureHours = Math.max(0, material.exposureLimitHours - currentExposureHours);
   const exposurePercentUsed = Math.min(
     100,
     Math.round((currentExposureHours / material.exposureLimitHours) * 100),

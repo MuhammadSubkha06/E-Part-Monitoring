@@ -15,6 +15,7 @@ const EVENT_LABEL: Record<HistoryEventType, string> = {
   MC_DRY_OUT: 'Left MC Dry',
   BAKING_START: 'Baking Started',
   BAKING_COMPLETE: 'Baking Completed',
+  SCRAP: 'Scrapped',
 };
 
 const EVENT_COLOR: Record<HistoryEventType, string> = {
@@ -24,6 +25,7 @@ const EVENT_COLOR: Record<HistoryEventType, string> = {
   MC_DRY_OUT: Colors.warning,
   BAKING_START: Colors.purple,
   BAKING_COMPLETE: Colors.success,
+  SCRAP: Colors.danger,
 };
 
 export default function HistoryTimeline({ events }: Props) {

@@ -15,16 +15,9 @@ export type ScannerStepStatus =
   | 'SUCCESS'
   | 'ERROR';
 
-export type CameraPermissionState = 'UNKNOWN' | 'GRANTED' | 'DENIED';
-
 export interface ScannerFlowState {
   step: ScannerStepStatus;
-  cameraPermission: CameraPermissionState;
   material: MaterialWithDerived | null;
   errorMessage: string | null;
   errorCode: 'INVALID_QR' | 'MASTER_DATA_NOT_FOUND' | 'UNKNOWN' | null;
-}
-
-export interface TorchState {
-  enabled: boolean;
 }

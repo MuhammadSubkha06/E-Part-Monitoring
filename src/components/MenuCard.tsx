@@ -2,6 +2,7 @@ import React from "react";
 import {
   TouchableOpacity,
   Text,
+  View,
   StyleSheet,
 } from "react-native";
 
@@ -11,12 +12,14 @@ interface Props {
   title: string;
   icon: string;
   onPress?: () => void;
+  badge?: number;
 }
 
 export default function MenuCard({
   title,
   icon,
   onPress,
+  badge,
 }: Props) {
   return (
     <TouchableOpacity
@@ -24,6 +27,12 @@ export default function MenuCard({
       onPress={onPress}
       activeOpacity={0.8}
     >
+      {!!badge && badge > 0 && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{badge > 9 ? "9+" : badge}</Text>
+        </View>
+      )}
+
       <Text style={styles.icon}>
         {icon}
       </Text>
@@ -52,6 +61,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     elevation: 4,
+
+    position: "relative",
+  },
+
+  badge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    backgroundColor: "#DC2626",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  badgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
   },
 
   icon: {

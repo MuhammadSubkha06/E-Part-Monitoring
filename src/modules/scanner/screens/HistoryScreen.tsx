@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useScannerFlow } from '../hooks/useScannerFlow';
 import { materialService } from '../services/MaterialService';
 import { MaterialHistoryEvent } from '../types/material.types';
-import ScannerCamera from '../components/ScannerCamera';
+import HidScanInput from '../components/HidScanInput';
 import LoadingOverlay from '../components/LoadingOverlay';
 import ErrorState from '../components/ErrorState';
 import MaterialSummary from '../components/MaterialSummary';
@@ -15,11 +15,10 @@ import HistoryTimeline from '../components/HistoryTimeline';
 import { Colors, Radius, Spacing, TouchTarget, Typography } from '../constants/theme';
 import { formatDate } from '../utils/dateUtils';
 import { DEMO_QR_CODES } from '../constants/demoQrCodes';
-import { TouchableOpacity } from 'react-native';
 
 export default function HistoryScreen() {
   // No transaction action — this module is strictly read-only.
-  const { state, setCameraPermission, handleScan, reset } = useScannerFlow();
+  const { state, handleScan, reset } = useScannerFlow();
   const [history, setHistory] = useState<MaterialHistoryEvent[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
@@ -35,16 +34,10 @@ export default function HistoryScreen() {
 
   if (state.step === 'IDLE_SCANNING') {
     return (
-      <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.idleScroll} keyboardShouldPersistTaps="handled">
         <Header title="Material History" subtitle="Scan to view full event history" />
-        <ScannerCamera
-          permission={state.cameraPermission}
-          onRequestPermission={() => setCameraPermission(true)}
-          onScan={handleScan}
-          hint="Align the QR code within the frame"
-          demoQrCodes={DEMO_QR_CODES}
-        />
-      </View>
+        <HidScanInput onScan={handleScan} hint="Stock In, Stock Out, MC Dry and Baking events" demoBarcodes={DEMO_QR_CODES} />
+      </ScrollView>
     );
   }
 
@@ -80,7 +73,7 @@ export default function HistoryScreen() {
             <View style={styles.grid}>
               <InfoCard label="Manufacturing Date" value={formatDate(m.manufacturingDate)} />
               <InfoCard label="Package Open Date" value={formatDate(m.openPackageDate)} />
-              <InfoCard label="Baking Count" value={`${m.bakingCount} / ${m.bakingLimit}`} />
+              <InfoCard label="Baking Count" value={m.bakingAllowed ? `${m.bakingCount} / ${m.bakingLimit}` : 'N/A'} />
               <InfoCard label="Current Status" value={m.currentStatus.replace('_', ' ')} />
               <InfoCard label="Current Location" value={m.currentLocation} flexBasis="100%" />
             </View>
@@ -119,6 +112,7 @@ function Header({ title, subtitle }: { title: string; subtitle?: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.background },
+  idleScroll: { flexGrow: 1, backgroundColor: Colors.background },
   header: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,

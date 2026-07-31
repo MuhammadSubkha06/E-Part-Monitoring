@@ -20,6 +20,7 @@ export type MaterialStatus =
   | 'AVAILABLE'
   | 'STOCK_IN'
   | 'STOCK_OUT'
+  | 'IN_PRODUCTION'
   | 'MC_DRY'
   | 'EXPOSURE_RUNNING'
   | 'EXPOSURE_PAUSED'
@@ -29,8 +30,23 @@ export type MaterialStatus =
   | 'NEED_BAKING'
   | 'BAKING_COMPLETED'
   | 'BAKING_LIMIT_REACHED'
+  | 'SCRAP'
   | 'MASTER_DATA_NOT_FOUND'
   | 'INVALID_QR';
+
+/**
+ * Material location on the shop floor: Line -> Machine -> Feeder Slot.
+ * Mandatory whenever a material is IN_PRODUCTION so that Material Tracking
+ * and Humidity Alert always know exactly where a material physically is.
+ */
+export interface MaterialLocation {
+  lineId: string;
+  lineName: string;
+  machineId: string;
+  machineName: string;
+  feederId: string;
+  feederLabel: string;
+}
 
 export type ExposureStatus = 'RUNNING' | 'PAUSED' | 'WARNING' | 'EXPIRED' | 'NOT_APPLICABLE';
 
@@ -42,7 +58,8 @@ export type HistoryEventType =
   | 'MC_DRY_IN'
   | 'MC_DRY_OUT'
   | 'BAKING_START'
-  | 'BAKING_COMPLETE';
+  | 'BAKING_COMPLETE'
+  | 'SCRAP';
 
 export interface MaterialHistoryEvent {
   id: string;
@@ -56,6 +73,7 @@ export interface MaterialHistoryEvent {
 export interface Material {
   id: string;
   qrCode: string;
+  uniqueNumber: string;
   partNumber: string;
   partName: string;
   lotNumber: string;
@@ -74,19 +92,43 @@ export interface Material {
 
   exposureLimitHours: number;
 
-  openPackageDate: string | null; 
+  openPackageDate: string | null;
+
+  // Exposure is tracked as a frozen "accumulated" value plus a running
+  // timestamp. When exposureResumedAt is set, exposure is actively ticking
+  // (IN PRODUCTION); when it is null, exposure is paused (e.g. MC Dry).
+  // `currentExposureHours` is always kept in sync (recomputed) by the
+  // repository every time a material is read or mutated, so consumers can
+  // keep treating it as a simple authoritative number.
+  accumulatedExposureHours: number;
+  exposureResumedAt: string | null;
   currentExposureHours: number;
+
   bakingCount: number;
   bakingLimit: number;
+  bakingAllowed: boolean;
 
   currentStatus: MaterialStatus;
   currentLocation: string;
   storage: string;
   warehouse: string;
-  line: string | null;
+  location: MaterialLocation | null;
   isInMcDry: boolean;
 
   history: MaterialHistoryEvent[];
+}
+
+/** A Humidity Alert / Need-Baking / Exposure-Expired notification. */
+export interface MaterialNotification {
+  id: string;
+  materialId: string;
+  partNumber: string;
+  lotNumber: string;
+  type: 'HUMIDITY_ALERT' | 'NEED_BAKING' | 'EXPOSURE_EXPIRED';
+  remainingExposureHours: number;
+  location: MaterialLocation | null;
+  actionRequired: string;
+  createdAt: string;
 }
 
 export interface MaterialDerivedState {
